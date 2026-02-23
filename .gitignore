@@ -17,6 +17,23 @@ ENV/
 pip-log.txt
 pip-delete-this-directory.txt
 
+# ===== Python Testing & Linting =====
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+.tox/
+
+# ===== Environment Variables =====
+.env
+.env.*
+.env.local
+.env.production
+.flaskenv
+
 # ===== ML Models (too large for Git) =====
 ml/models/*.h5
 ml/models/*.pth
@@ -25,6 +42,12 @@ ml/models/*.onnx
 ml/models/*.pkl
 ml/models/*.joblib
 ml/models/checkpoints/
+
+# ===== ML Generated Outputs =====
+ml/*.png
+ml/*.jpg
+ml/*.jpeg
+ml/*.svg
 
 # ===== Datasets & Processed Data (too large for Git) =====
 ml/data/raw/
@@ -38,6 +61,8 @@ dist/
 dist-ssr/
 *.local
 package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # ===== Logs =====
 logs/
@@ -70,7 +95,12 @@ Desktop.ini
 # ===== Jupyter =====
 .ipynb_checkpoints/
 
+# ===== Database =====
+*.sqlite3
+*.db
+
 # ===== Misc =====
 *.bak
 *.tmp
 *.temp
+*.cache
