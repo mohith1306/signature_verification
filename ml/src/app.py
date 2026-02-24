@@ -22,7 +22,9 @@ MODEL_PATH = os.environ.get(
     "MODEL_PATH",
     os.path.join(os.path.dirname(__file__), "..", "models", "siamese_signature_model.h5")
 )
+print(f"[INFO] Loading model from: {os.path.abspath(MODEL_PATH)}")
 model = load_model(MODEL_PATH, custom_objects={"AbsoluteDifference": AbsoluteDifference})
+print("[INFO] Model loaded successfully!")
 
 def preprocess_image(img_path):
     """Preprocess input image for Siamese model prediction"""

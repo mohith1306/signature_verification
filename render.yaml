@@ -6,16 +6,18 @@ services:
   # ===== Flask ML Backend =====
   - type: web
     name: signature-api
-    runtime: docker
-    dockerfilePath: ./ml/Dockerfile
-    dockerContext: ./ml
+    runtime: python
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --timeout 120 --workers 1 ml.src.app:app
     region: oregon
     plan: free                 # Change to "starter" if you need more resources
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.12"
       - key: ALLOWED_ORIGINS
-        value: https://signature-verification-xxxx.onrender.com   # ← replace with your frontend URL after first deploy
+        value: "*"             # ← set to your frontend URL after first deploy
       - key: MODEL_PATH
-        value: /app/models/siamese_signature_model.h5
+        value: ml/models/siamese_signature_model.h5
     autoDeploy: true
     healthCheckPath: /
 
