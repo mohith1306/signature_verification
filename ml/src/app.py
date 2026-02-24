@@ -17,11 +17,33 @@ app = Flask(__name__)
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*")
 CORS(app, origins=ALLOWED_ORIGINS.split(","))
 
-# Load the Siamese model with the custom AbsoluteDifference layer
-MODEL_PATH = os.environ.get(
-    "MODEL_PATH",
-    os.path.join(os.path.dirname(__file__), "..", "models", "siamese_signature_model.h5")
-)
+# ---------- Locate the model file ----------
+# Try multiple possible locations so it works both locally and on Render
+def find_model():
+    """Search for the model file in several known locations."""
+    candidates = [
+        # 1. Explicit env var (if set)
+        os.environ.get("MODEL_PATH", ""),
+        # 2. Relative to this file: ml/src/app.py -> ml/models/
+        os.path.join(os.path.dirname(__file__), "..", "models", "siamese_signature_model.h5"),
+        # 3. Relative to cwd (Render runs from repo root)
+        os.path.join("ml", "models", "siamese_signature_model.h5"),
+        # 4. Absolute path on Render
+        "/opt/render/project/src/ml/models/siamese_signature_model.h5",
+    ]
+    for path in candidates:
+        if path and os.path.isfile(path):
+            return path
+    # If nothing found, print debug info and raise
+    print("[ERROR] Model not found! Searched:")
+    for p in candidates:
+        exists = os.path.isfile(p) if p else False
+        print(f"  {p!r} -> exists={exists}")
+    print(f"[DEBUG] cwd = {os.getcwd()}")
+    print(f"[DEBUG] __file__ = {__file__}")
+    raise FileNotFoundError("siamese_signature_model.h5 not found in any known location")
+
+MODEL_PATH = find_model()
 print(f"[INFO] Loading model from: {os.path.abspath(MODEL_PATH)}")
 model = load_model(MODEL_PATH, custom_objects={"AbsoluteDifference": AbsoluteDifference})
 print("[INFO] Model loaded successfully!")
