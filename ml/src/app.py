@@ -5,16 +5,23 @@ import numpy as np
 import cv2
 import os
 import sys
+import tempfile
 
 # Add parent directory so siamese module can be imported
 sys.path.insert(0, os.path.dirname(__file__))
 from siamese.siamese_model import AbsoluteDifference
 
 app = Flask(__name__)
-CORS(app)  # Allow cross-origin requests from the React frontend
+
+# Allow CORS from the configured frontend origin(s), or all origins in dev
+ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*")
+CORS(app, origins=ALLOWED_ORIGINS.split(","))
 
 # Load the Siamese model with the custom AbsoluteDifference layer
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "siamese_signature_model.h5")
+MODEL_PATH = os.environ.get(
+    "MODEL_PATH",
+    os.path.join(os.path.dirname(__file__), "..", "models", "siamese_signature_model.h5")
+)
 model = load_model(MODEL_PATH, custom_objects={"AbsoluteDifference": AbsoluteDifference})
 
 def preprocess_image(img_path):
@@ -40,8 +47,10 @@ def predict():
     img1 = request.files[img1_key]
     img2 = request.files[img2_key]
 
-    img1_path = f"temp_{img1.filename}"
-    img2_path = f"temp_{img2.filename}"
+    # Use tempfile for safe temp file handling on all platforms
+    tmp_dir = tempfile.mkdtemp()
+    img1_path = os.path.join(tmp_dir, f"temp_{img1.filename}")
+    img2_path = os.path.join(tmp_dir, f"temp_{img2.filename}")
 
     img1.save(img1_path)
     img2.save(img2_path)
@@ -57,10 +66,11 @@ def predict():
         return jsonify({'error': str(e)}), 500
     finally:
         # Clean up temp files even on error
-        if os.path.exists(img1_path):
-            os.remove(img1_path)
-        if os.path.exists(img2_path):
-            os.remove(img2_path)
+        for p in [img1_path, img2_path]:
+            if os.path.exists(p):
+                os.remove(p)
+        if os.path.exists(tmp_dir):
+            os.rmdir(tmp_dir)
 
     confidence = round(float(prediction), 4)
     match_percentage = round(float(prediction) * 100, 2)

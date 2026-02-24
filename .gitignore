@@ -34,11 +34,12 @@ coverage.xml
 .env.production
 .flaskenv
 
-# ===== ML Models (too large for Git) =====
-ml/models/*.h5
-ml/models/*.pth
-ml/models/*.pt
-ml/models/*.onnx
+# ===== ML Models =====
+# Large model files are tracked via Git LFS (see .gitattributes)
+# ml/models/*.h5  — now tracked by Git LFS
+# ml/models/*.pth — now tracked by Git LFS
+# ml/models/*.pt  — now tracked by Git LFS
+# ml/models/*.onnx — now tracked by Git LFS
 ml/models/*.pkl
 ml/models/*.joblib
 ml/models/checkpoints/

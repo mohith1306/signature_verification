@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import './Center.css';
 import axios from 'axios';
 
+// In production, VITE_API_URL should point to your Render backend URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Center = () => {
   const [image1, setImage1] = useState(null);
   const [image2, setImage2] = useState(null);
@@ -30,7 +33,7 @@ const Center = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/predict", formData);
+      const res = await axios.post(`${API_URL}/predict`, formData);
       console.log("API Response:", res.data);
 
       const percentage = res.data.match_percentage;
